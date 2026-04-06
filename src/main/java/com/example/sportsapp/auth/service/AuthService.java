@@ -26,7 +26,7 @@ public class AuthService {
     private final OtpRepository otpRepository;
     private final JavaMailSenderImpl mailSender;
     private final Random random = new Random();
-    
+
 
     @Value("${jwt.secret}")
     private String secretKey;
