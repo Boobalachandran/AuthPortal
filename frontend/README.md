@@ -1,6 +1,6 @@
-# SportsApp Frontend
+# AuthPortal Frontend
 
-React + TypeScript + Vite frontend for the SportsApp Spring Boot backend.
+React + TypeScript + Vite frontend for the AuthPortal Spring Boot backend.
 
 ## Tech Stack
 

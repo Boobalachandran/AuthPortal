@@ -71,7 +71,7 @@ export default function VerifyOtpPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 shadow-lg shadow-brand-500/30 mb-4 text-3xl">
             ⚽
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">SportsApp</h1>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">AuthPortal</h1>
         </div>
 
         <div className="auth-card">

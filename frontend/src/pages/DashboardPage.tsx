@@ -27,7 +27,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <span className="text-2xl">⚽</span>
-              <span className="text-white font-extrabold text-xl tracking-tight">SportsApp</span>
+              <span className="text-white font-extrabold text-xl tracking-tight">AuthPortal</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-white/50 text-sm hidden sm:block">{email}</span>
