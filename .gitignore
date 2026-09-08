@@ -1,8 +1,18 @@
 HELP.md
 target/
+.env
+.env.local
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Node ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
 
 ### STS ###
 .apt_generated
@@ -18,6 +28,7 @@ target/
 *.iws
 *.iml
 *.ipr
+.DS_Store
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +42,13 @@ build/
 
 ### VS Code ###
 .vscode/
+*.code-workspace
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Gradle ###
+.gradle
+gradle/
+

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearSession, getEmail } from '../api/auth'
 
@@ -12,7 +13,8 @@ const sports = [
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const email = getEmail() ?? 'Athlete'
+  const [email] = useState(getEmail() ?? 'Athlete')
+
 
   const handleLogout = () => {
     clearSession()
