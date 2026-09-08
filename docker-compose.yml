@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5433:5433"
+      - "5433:5432"
     volumes:
       - personal-postgres-data:/var/lib/postgresql/data
 
@@ -16,7 +16,7 @@ services:
     build: ./auth-service
     container_name: authportal-auth-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5433/authportal
+      DB_URL: jdbc:postgresql://postgres:5432/authportal
       DB_USERNAME: postgres
       DB_PASSWORD: ${DB_PASSWORD}
       REDIS_HOST: redis
