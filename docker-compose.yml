@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: authportal
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: REDACTED_DB_PASSWORD
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -18,14 +18,16 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5433/authportal
       DB_USERNAME: postgres
-      DB_PASSWORD: REDACTED_DB_PASSWORD
+      DB_PASSWORD: ${DB_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
       JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
     ports:
       - "8080:8080"
