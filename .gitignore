@@ -85,3 +85,6 @@ terraform/tfplan
 # Temporary test output
 auth-service/test_output*.txt
 
+
+# Frontend dependencies
+frontend/node_modules/
