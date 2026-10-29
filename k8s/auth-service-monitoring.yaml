@@ -1,0 +1,14 @@
+
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: auth-service
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: auth-service
+  endpoints:
+    - port: 8080
+      path: /actuator/prometheus
+      interval: 30s

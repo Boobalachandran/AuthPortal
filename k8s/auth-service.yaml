@@ -1,0 +1,174 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: us-central1-docker.pkg.dev/sports-app-auth-493607/authportal-repo/authportal-auth-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DB_URL
+              value: "jdbc:postgresql://postgres:5432/authportal"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: REDIS_HOST
+              value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: JWT_SECRET
+            - name: JWT_EXPIRATION
+              value: "300000"
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: GOOGLE_CLIENT_SECRET
+            - name: GOOGLE_REDIRECT_URI
+              value: "https://<REPLACE_WITH_YOUR_DOMAIN_OR_EXTERNAL_IP>:443/login/oauth2/code/google"
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: MAIL_USERNAME
+            - name: MAIL_FROM_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: MAIL_FROM_ADDRESS
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: MAIL_PASSWORD
+            - name: MAIL_HOST
+              value: "smtp.gmail.com"
+            - name: MAIL_PORT
+              value: "465"
+            # ─── New configuration (patch) ─────────────────────────────────────────────
+            # CORS allowed origins: Frontend URL that browser uses to make requests
+            # ⚠️  CRITICAL: NEVER use localhost:3000 in GKE
+            #     Inside a pod, localhost resolves to the pod itself, not the frontend
+            #
+            # Instructions to set this value:
+            # 1. Deploy frontend first (if not already deployed):
+            #    kubectl apply -f k8s/frontend.yaml
+            #
+            # 2. Get the LoadBalancer external IP:
+            #    kubectl get service frontend
+            #    Output example:
+            #      NAME       TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)        AGE
+            #      frontend   LoadBalancer   10.32.100.50    34.123.45.67     80:30123/TCP   2m
+            #
+            # 3. Wait for EXTERNAL-IP to appear (may take 1-3 minutes)
+            #    kubectl get service frontend --watch
+            #
+            # 4. Update this line with the EXTERNAL-IP:
+            #    value: "http://34.123.45.67"  (for HTTP)
+            #    or for HTTPS with a domain name:
+            #    value: "https://app.example.com"
+            #
+            # 5. Re-apply this manifest:
+            #    kubectl apply -f k8s/auth-service.yaml
+            #
+            # 6. Verify auth-service pods restart with new config:
+            #    kubectl get pods -l app=auth-service
+            #
+            # If you have already deployed auth-service with an old IP:
+            #    kubectl set env deployment/auth-service \
+            #      APP_CORS_ALLOWED_ORIGINS="http://<NEW_IP>"
+            #    (this will trigger rolling restart)
+            - name: APP_CORS_ALLOWED_ORIGINS
+              value: "http://<REPLACE_WITH_FRONTEND_LOADBALANCER_EXTERNAL_IP>"
+            # OAuth2 frontend redirect destination (post-login redirect URL)
+            # ⚠️  CRITICAL: NEVER use localhost:3000 in GKE (same reason as CORS above)
+            #
+            # After successful Google OAuth login, auth-service redirects browser to:
+            #   http://<this-value>/dashboard?token=<JWT>&email=<email>
+            #
+            # This MUST match the APP_CORS_ALLOWED_ORIGINS value for browser to receive response.
+            #
+            # Update instructions (same as APP_CORS_ALLOWED_ORIGINS above):
+            #   1. Get frontend LoadBalancer IP: kubectl get service frontend
+            #   2. Update this value to match
+            #   3. Re-apply manifest: kubectl apply -f k8s/auth-service.yaml
+            - name: APP_OAUTH_FRONTEND_REDIRECT_BASE_URL
+              value: "http://<REPLACE_WITH_FRONTEND_LOADBALANCER_EXTERNAL_IP>"
+            # SQL logging: enable for debugging, disable for production
+            - name: SHOW_SQL
+              value: "false"
+            # Java options
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Djava.net.preferIPv4Stack=true"
+            # ─────────────────────────────────────────────────────────────────────────
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

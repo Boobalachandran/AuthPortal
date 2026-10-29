@@ -23,11 +23,23 @@ services:
       REDIS_PORT: 6379
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: 300000
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: "${GOOGLE_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/google}"
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 465
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      # ─── New configuration (patch) ────────────────────────────────────────────
+      # CORS allowed origins: comma-separated browser origins that can make requests
+      APP_CORS_ALLOWED_ORIGINS: "${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000}"
+      # OAuth2 frontend redirect destination (after login, browser receives this URL with JWT)
+      APP_OAUTH_FRONTEND_REDIRECT_BASE_URL: "${APP_OAUTH_FRONTEND_REDIRECT_BASE_URL:-http://localhost:3000}"
+      # SQL logging for debugging (disabled by default; enable only during development)
+      SHOW_SQL: "${SHOW_SQL:-false}"
+      # ──────────────────────────────────────────────────────────────────────────
       JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
     ports:
       - "8080:8080"
@@ -38,6 +50,7 @@ services:
     build: ./notification-service
     container_name: authportal-notification-service
     environment:
+      # Kafka internal listener (containers communicate via kafka:9092)
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 465
@@ -95,7 +108,23 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: authportal-prometheus
+    ports:
+       - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - auth-service
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: authportal-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
 
 volumes:
   personal-postgres-data:

@@ -52,3 +52,36 @@ Thumbs.db
 .gradle
 gradle/
 
+
+# Terraform state and local configuration
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Local deployment artifacts
+authportal-images.tar
+
+# Temporary configuration backups
+*.properties.backup
+
+
+
+# Generated Terraform plan
+terraform/tfplan
+
+
+# Local Terraform execution plans
+**/tfplan
+**/*.tfplan
+
+# Temporary test output
+auth-service/test_output*.txt
+
