@@ -1,52 +1,63 @@
-# Web Client Overview
+# AuthPortal Frontend
 
-React + TypeScript + Vite client for an authentication platform.
+React and TypeScript web client, built with Vite.
 
-## Tech Stack
+> **AI authorship:** The frontend was created entirely by AI after the backend REST APIs had been implemented. This includes the user interface and the client-side integration with those APIs.
 
-| Tool | Purpose |
-|------|---------|
-| React | UI framework |
-| TypeScript | Type safety |
-| Vite | Development server and bundling |
-| Tailwind CSS | Utility-first styling |
+## Stack
+
+| Technology | Purpose |
+|---|---|
+| React | UI |
+| TypeScript | Type checking |
+| Vite | Development server and production bundling |
+| Tailwind CSS | Styling |
 | React Router | Client-side routing |
-| Axios | HTTP communication |
-| Toast library | User feedback notifications |
+| Axios | HTTP requests |
+| React Hot Toast | User feedback |
 
-## Routes
+## Screens and routes
 
-| Route | Description |
-|-------|-------------|
-| `/login` | Email/password login and OAuth option |
-| `/signup` | New account registration |
-| `/forgot-password` | OTP request flow |
-| `/verify-otp` | OTP verification |
-| `/reset-password` | Password reset completion |
+| Route | Purpose |
+|---|---|
+| `/login` | Email/password login and Google OAuth entry point |
+| `/signup` | Account registration |
+| `/forgot-password` | Request a password-reset OTP |
+| `/verify-otp` | Verify the OTP |
+| `/reset-password` | Complete password reset |
 | `/dashboard` | Authenticated landing page |
 
-## Local Run
+## Run locally
 
-```bash
-cd <web-client-root>
+From the repository root:
+
+```sh
+cd frontend
 npm install
 npm run dev
 ```
 
-## Production Build
+Vite serves the frontend on port 3000 and proxies `/auth`, `/oauth2`, and OAuth callback paths to the API gateway at `http://localhost:8081`.
 
-```bash
+Build the production assets with:
+
+```sh
 npm run build
 ```
 
-## API Mapping
+The production Docker image serves the built application with Nginx and proxies API and OAuth requests to the `gateway` service.
 
-| Client Action | API Endpoint |
-|---------------|--------------|
+## Backend integration
+
+The frontend calls the auth service REST API through the gateway:
+
+| Client operation | Method and path |
+|---|---|
 | Login | `POST /auth/login` |
 | Signup | `POST /auth/signup` |
-| Forgot Password | `POST /auth/forgotPassword` |
+| Request password-reset OTP | `POST /auth/forgotPassword` |
 | Verify OTP | `POST /auth/verifyOtp` |
-| Reset Password | `POST /auth/resetPassword` |
-| OAuth Login | `GET /oauth2/authorization/google` |
+| Reset password | `POST /auth/resetPassword` |
+| Start Google OAuth | `GET /oauth2/authorization/google` |
 
+The client uses browser storage for its JWT session. Google OAuth returns the token to the dashboard route in URL query parameters before the client processes the callback. These are known security limitations and should be addressed before a security-sensitive production deployment.
